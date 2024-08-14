@@ -11,10 +11,10 @@
   "storage": [
     {"name":"Kyykka.app.js","url":"Kyykka.app.js"},
     {"name":"Kyykka.png","url":"app-icon.js","evaluate":true},
-    {"name":"Kyykka.settings.js","url":"Kyykka.settings.js"},
+    {"name":"Kyykka.settings.js","url":"Kyykka.settings.js"}
   ],
   "data": [
-    {"wildcard":"KyAc_?.csv"},
+    {"name":"KyAc_?.csv"},
     {"name":"Kyykka.settings.json"}
   ]
 }
