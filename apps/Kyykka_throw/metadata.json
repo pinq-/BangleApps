@@ -1,7 +1,7 @@
 { "id": "Kyykka_throw",
   "name": "Kyykka throw",
   "shortName":"KyThr",
-  "icon": "app.png",
+  "icon": "Kyykka.png",
   "version": "0.02",
   "description": "Measure throws in kyykkä",
   "supports" : ["BANGLEJS2"],
