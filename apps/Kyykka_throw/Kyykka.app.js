@@ -9,7 +9,9 @@ var accelId = 0;
 var total_throws = 0;
 var total_time = 0;
 var throws_acc = [];
-
+// Todo 
+//  Kiihtyvyys viimeisen nelj ä n heiton perusteella
+// Bpm 
 var settings = require('Storage').readJSON("Kyykka.settings.json", true) || {};
 
 function saveSettings() {
@@ -33,6 +35,8 @@ function RemoveOldJson(json_files){
 }
 
 function SaveFile(){
+  g.clear();
+  E.showMessage("Saving data");
   let storage = require("Storage");
   //let csv_files_N = storage.list(/^KyAc_.*$/).length;
   let json_files = storage.list(/^KyRec_.*.json$/);
@@ -67,6 +71,9 @@ function SaveFile(){
   //    storage.write(file.name,txt,file.offset);
   //  file.offset += l;
   RemoveOldJson(json_files);
+  g.clear();
+  E.showMessage("Saved");
+  g.clear();
 }
 function showMenu() {
 	var menu = {
@@ -232,17 +239,18 @@ function startRecord() {
 						if (stopped) {
 							showMenu();
 						} else {
-              recordStop();
-							Bangle.removeListener("accel", accelHandler);
 							layout.state.label = "STOPPED";
 							layout.state.bgCol = "#0f0";
-							stopped = true;
-							layout.render();
+              layout.render();
+							Bangle.removeListener("accel", accelHandler);
+              recordStop();
+              stopped = true;
               let date = new Date();
               settings.throws_n = settings.throws_n + total_throws + Throws_n;
               settings.total_time = settings.total_time + show_time;
               settings.throw_log.push({"throws": total_throws + Throws_n, "time": show_time, "Date": date.getHours() + ":" + date.getMinutes() + " " + date.getDate() + "." + (date.getMonth() +1) + "." + date.getFullYear().toString().substr(-2)});
               saveSettings();
+              layout.render();
 						}
 					}
 				},
@@ -257,7 +265,7 @@ function startRecord() {
   var show_time = 0;
   var t_old = 0;
   var throw_time_limit = 0;
-  var write_record = 0;
+  //var write_record = 0;
   var write_time = getTime();
   let end_samples = 40;
   let end_sample_n = 0;
@@ -272,16 +280,17 @@ function startRecord() {
     total_throws = total_throws + Throws_n;
     Throws_n = 0;
     if (save_record) SaveFile();
+    render_layout();
   }
 	function accelHandler(accel) {
     let timer_ref = getTime();
-		show_time = ~~(timer_ref - start_time);
     aX = Math.abs(accel.x * 2);
     //console.log(aX);
     //print(getTime() - start_time);
-    if (show_time != t_old){
+    if ((timer_ref - t_old) > 60){ // render every 60 sec
       //print((t - t_old));
-      t_old = show_time;
+      t_old = timer_ref;
+      show_time = ~~(timer_ref - start_time);
       render_layout();
     }
     if (throw_max_g != 0){
@@ -291,17 +300,17 @@ function startRecord() {
         show_max_thorw_g = ((throw_max_g / thorw_max_g_n) * (timer_ref -throw_time_limit)).toFixed(2);
         throw_max_g = 0;
         thorw_max_g_n = 0;
+        if (end_sample_n < 2) render_layout();
       }
     }
     //print(aX, g_lim ,(timer_ref -throw_time_limit));
 		if (aX > g_lim && (timer_ref -throw_time_limit) > 3 ) {
       //console.log(aX, show_time);
       throw_time_limit = timer_ref;
-			Throws_n++;
       throw_max_g = aX;
-      end_sample_n++;
-      thorw_max_g_n++;
-      write_record = 1;
+      end_sample_n = 1;
+      thorw_max_g_n = 1;
+      Throws_n++;
 		}
     if (save_record){
       if (end_sample_n ==  end_samples) {
@@ -314,11 +323,12 @@ function startRecord() {
         accely.fill(0);
         accelz.fill(0);
         timestep.fill(0);
+        render_layout();
       }
       accelx[accelId] = accel.x * SCALE * 2;
       accely[accelId] = accel.y * SCALE * 2;
       accelz[accelId] = accel.z * SCALE * 2;
-      if ((getTime() - write_time)*1000 > 65000) write_time = timer_ref; // If it goes over 65535. Limit of the Uint16
+      if ((timer_ref - write_time) > 65) write_time = timer_ref; // If it goes over 65535. Limit of the Uint16
       timestep[accelId] = (timer_ref - write_time)*1000;
       if (end_sample_n > 0) end_sample_n++;
       accelId++;
@@ -327,7 +337,7 @@ function startRecord() {
 	}
   function render_layout(){
     layout.throws.label = Throws_n + "/" + (settings.max_throws -  Throws_n);
-		layout.time.label = Math.floor(show_time / 60) + ":" + ("0" + ~~(show_time)).slice(-2);
+		layout.time.label = Math.floor(show_time / 3600) + ":" + ("0" + ~~(show_time / 60)).slice(-2);
     layout.round.label = round_n;
     layout.total_throws.label = (total_throws + Throws_n) + "/" + (2*settings.max_throws -  (total_throws + Throws_n));
     layout.Thr_speed.label = show_max_thorw_g + " g/s";
