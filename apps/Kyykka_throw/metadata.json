@@ -10,7 +10,11 @@
   "tags": "sport",
   "storage": [
     {"name":"Kyykka.app.js","url":"Kyykka.app.js"},
-    {"name":"Kyykka.png","url":"app-icon.js","evaluate":true}
+    {"name":"Kyykka.png","url":"app-icon.js","evaluate":true},
+    {"name":"Kyykka.settings.js","url":"Kyykka.settings.js"},
   ],
-  "data": [{"wildcard":"KyAc_?.csv"}]
+  "data": [
+    {"wildcard":"KyAc_?.csv"},
+    {"name":"Kyykka.settings.json"}
+  ]
 }
