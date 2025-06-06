@@ -147,117 +147,124 @@ function startRecord() {
 	var layout = new Layout({
 			type: "v",
 			c: [{
-					type: "h",
+          type: "h",
 					c: [{
 							type: "v",
 							c: [{
 									type: "txt",
 									font: "6x8",
 									label: "Throws",
-									pad: 2
+									//pad: 2
 								}, {
 									type: "txt",
 									id: "throws",
-									font: "6x8:2",
+									font: "6x8:3",
 									label: "  -  ",
-									pad: 5,
+									//pad: 5,
 									bgCol: g.theme.bg
 								}, ]
-						}, {
-							type: "v",
-							c: [{
-									type: "txt",
-									font: "6x8",
-									label: "Time",
-									pad: 2
-								}, {
-									type: "txt",
-									id: "time",
-									font: "6x8:2",
-									label: "  -  ",
-									pad: 5,
-									bgCol: g.theme.bg
-								}, ]
-						}, ]
-				}, {
-					type: "h",
-					c: [{
-							type: "v",
-							c: [{
-									type: "txt",
-									font: "6x8",
-									label: "Round",
-									pad: 2
-								}, {
-									type: "txt",
-									id: "round",
-									font: "6x8:2",
-									label: "  -  ",
-									pad: 5,
-									bgCol: g.theme.bg
-								}, ]
-						}, {
+						  },{
 							type: "v",
 							c: [{
 									type: "txt",
 									font: "6x8",
 									label: "Total Thr",
-									pad: 3
+									//pad: 2
 								}, {
 									type: "txt",
 									id: "total_throws",
-									font: "6x8:2",
+									font: "6x8:3",
+									label: "-",
+									//pad: 5,
+									bgCol: g.theme.bg
+								}, ]
+						}, ]
+				}, {
+					type: "h",
+					c: [ {
+							  type: "v",
+							  c: [{
+									type: "txt",
+									font: "6x8",
+									label: "Pre",
+								}, {
+									type: "txt",
+									id: "pre_round",
+									font: "6x8:3",
+									label: " - ",
+								}]
+						}, {
+							  type: "v",
+							  c: [{
+									type: "txt",
+									font: "6x8",
+									label: "Round",
+								}, {
+									type: "txt",
+									id: "round",
+									font: "6x8:3",
+									label: "-",
+								}, ]
+						}, {
+							  type: "v",
+							  c: [{
+									type: "txt",
+									font: "6x8",
+									label: "Speed g/s",
+									//pad: 3
+								}, {
+									type: "txt",
+									id: "Thr_speed",
+									font: "6x8:3",
 									label: "  -  ",
-									pad: 5,
+									//pad: 5,
 									bgCol: g.theme.bg
 								}, ]
 						}]
-				},{
-					type: "txt",
-					id: "state",
-					font: "6x8:2",
-					label: "RECORDING",
-					bgCol: "#f00",
-					pad: 5,
-					fillx: 1
-				},{
-					type: "txt",
-					id: "Thr_speed",
-					font: "6x8:2",
-					label: "0",
-					bgCol: "#69F",
-          col: "#000",
-					pad: 5,
-					fillx: 1
-				},
+				}, {
+          filly: 1
+        }, {
+					type: "h",
+					c: [{
+									type: "btn",
+                  cb: l=>add_round(),
+                  src: require("icons").getIcon("sync")
+								}, {
+                  type: "btn",
+                  id: "time",
+                  font: "6x8:3",
+                  label: "-",
+                  fillx: 1,
+                  cb: l=>pause_recording(),
+                  btnFaceCol: "#0000FF",
+                }, {
+									type: "btn",
+									id: "btnStop",
+                  src: require("icons").getIcon("close"),
+									btnFaceCol: "#f00",
+                  cb: () => {
+                    if (stopped) {
+                      showMenu();
+                    } else {
+                      layout.btnStop.btnFaceCol = "#0f0";
+                      layout.render();
+                      Bangle.removeListener("accel", accelHandler);
+                      recordStop();
+                      stopped = true;
+                      let date = new Date();
+                      settings.throws_n = settings.throws_n + total_throws + Throws_n;
+                      settings.total_time = settings.total_time + show_time;
+                      settings.throw_log.push({"throws": total_throws + Throws_n, "time": show_time, "Date": date.getHours() + ":" + date.getMinutes() + " " + date.getDate() + "." + (date.getMonth() +1) + "." + date.getFullYear().toString().substr(-2)});
+                      saveSettings();
+                      layout.render();
+                    }
+                  }
+						}]
+				}, 
          ]
-		}, {
-			btns: [{
-					id: "btnStop",
-					label: "STOP",
-					cb: () => {
-						if (stopped) {
-							showMenu();
-						} else {
-							layout.state.label = "STOPPED";
-							layout.state.bgCol = "#0f0";
-              layout.render();
-							Bangle.removeListener("accel", accelHandler);
-              recordStop();
-              stopped = true;
-              let date = new Date();
-              settings.throws_n = settings.throws_n + total_throws + Throws_n;
-              settings.total_time = settings.total_time + show_time;
-              settings.throw_log.push({"throws": total_throws + Throws_n, "time": show_time, "Date": date.getHours() + ":" + date.getMinutes() + " " + date.getDate() + "." + (date.getMonth() +1) + "." + date.getFullYear().toString().substr(-2)});
-              saveSettings();
-              layout.render();
-						}
-					}
-				},
-        {label:"Round", cb: l=>add_round()}
-			]
-		});
+		}, {lazy:true});
 	layout.render();
+  //layout.debug();
 	var start_time = getTime();
   var Throws_n = 0;
 	var maxMag = 0;
@@ -274,18 +281,32 @@ function startRecord() {
   let throw_max_g = 0;
   var show_max_thorw_g = 0;
   let thorw_max_g_n = 0;
+  let pause = false;
   
   function add_round(){
     round_n++;
     total_throws = total_throws + Throws_n;
+    layout.pre_round.label = (settings.max_throws -  Throws_n);
     Throws_n = 0;
     if (save_record) SaveFile();
     render_layout();
   }
+  
+  function pause_recording(){
+    pause = !pause;
+    if (pause){
+      layout.time.btnFaceCol = "#f00";
+      //Bangle.removeListener("accel", accelHandler);
+    }
+    else{
+      layout.time.btnFaceCol = "#0000FF";
+      //Bangle.on("accel", accelHandler);
+    }
+    layout.render();
+  }
 	function accelHandler(accel) {
     let timer_ref = getTime();
     aX = Math.abs(accel.x * 2);
-    //console.log(aX);
     //print(getTime() - start_time);
     if ((timer_ref - t_old) > 60){ // render every 60 sec
       //print((t - t_old));
@@ -293,7 +314,9 @@ function startRecord() {
       show_time = ~~(timer_ref - start_time);
       render_layout();
     }
-    if (throw_max_g != 0){
+    if (pause) return;
+    //console.log(aX);
+    if (throw_max_g != 0){ // after the limit has past count how long stay in the max
       throw_max_g += aX;
       thorw_max_g_n++;
       if (aX < g_lim){
@@ -337,10 +360,10 @@ function startRecord() {
 	}
   function render_layout(){
     layout.throws.label = Throws_n + "/" + (settings.max_throws -  Throws_n);
-		layout.time.label = Math.floor(show_time / 3600) + ":" + ("0" + ~~(show_time / 60)).slice(-2);
+		layout.time.label = Math.floor(show_time / 3600) + ":" + ("0" + ~~(show_time%3600/60)).slice(-2);
     layout.round.label = round_n;
-    layout.total_throws.label = (total_throws + Throws_n) + "/" + (2*settings.max_throws -  (total_throws + Throws_n));
-    layout.Thr_speed.label = show_max_thorw_g + " g/s";
+    layout.total_throws.label = (total_throws + Throws_n); //+ "/" + (2*settings.max_throws -  (total_throws + Throws_n));
+    layout.Thr_speed.label = show_max_thorw_g;
 		layout.render();
   }
   
