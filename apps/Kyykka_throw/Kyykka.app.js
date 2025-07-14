@@ -1,3 +1,4 @@
+
 var HZ = 100;
 var SAMPLES = 1.6 * HZ;
 var SCALE = 2000;
@@ -75,161 +76,194 @@ function SaveFile(){
   E.showMessage("Saved");
   g.clear();
 }
+
+function Send_bl_Throw(){
+  Bluetooth.println(JSON.stringify({data:{timestep:timestep, acc:{x:accelx, y:accely, z:accelz}, inx:accelId, mode: 1, device: "Bangle"}}));
+}
 function showMenu() {
-	var menu = {
-		"": {
-			title: "Kyykka ä pp"
-		},
-		"< Back": function () {
-			load();
-		},
-		"Start": function () {
+  var menu = {
+    "": {
+      title: "Kyykka äpp"
+    },
+    "< Back": function () {
+      load();
+    },
+    "Start": function () {
       loadSettings();
-			E.showMenu();
+      E.showMenu();
       recordStart();
-		},
-		"View Logs": function () {
-			viewLogs();
-		},
+    },
+    "View Logs": function () {
+      viewLogs();
+    },
     "Settings": function () {
-			eval(require("Storage").read("Kyykka.settings.js"))(() => showMenu());
-		},
-	};
-	E.showMenu(menu);
+      eval(require("Storage").read("Kyykka.settings.js"))(() => showMenu());
+    },
+  };
+  E.showMenu(menu);
 }
 function viewLogs() {
     loadSettings();
-		var menu = {
-		"": {
-			title: "Logs"
-		},
-		"< Back": function () {
-			showMenu();
-		},
-		 "Total throws" : {
+    var menu = {
+    "": {
+      title: "Logs"
+    },
+    "< Back": function () {
+      showMenu();
+    },
+     "Total throws" : {
       value: settings.throws_n
      },
     "Total time" : {
       value:  (Math.floor(settings.total_time / 60) + ":" + ("0" + ~~(settings.total_time)).slice(-2))
      },
-	};
-	E.showMenu(menu);
+  };
+  E.showMenu(menu);
 }
 
 
 function recordStart() {"ram"
   console.log("start settings");
-	accelId = 0;
-	Bangle.accelWr(0x18, 0b01110100);
-	Bangle.accelWr(0x1B, 0x03 | 0x40);
-	Bangle.accelWr(0x18, 0b11110100);
-	Bangle.setPollInterval(10);
+  accelId = 0;
+  Bangle.accelWr(0x18, 0b01110100);
+  Bangle.accelWr(0x1B, 0x03 | 0x40);
+  Bangle.accelWr(0x18, 0b11110100);
+  Bangle.setPollInterval(10);
   startRecord();
 }
 
 function recordStop() {"ram"
   console.log("end settings");
   Bangle.setPollInterval(80);
-	Bangle.accelWr(0x18, 0b01101100);
-	Bangle.accelWr(0x1B, 0x0);
-	Bangle.accelWr(0x18, 0b11101100);
+  Bangle.accelWr(0x18, 0b01101100);
+  Bangle.accelWr(0x1B, 0x0);
+  Bangle.accelWr(0x18, 0b11101100);
   if (settings.save_record) SaveFile();
   //print(accelx);
   //print(throws_acc);
 }
 
 function startRecord() {
-	var stopped = false;
+  var stopped = false;
   var round_n = 1;
-	g.clear(1);
-	Bangle.drawWidgets();
-	var Layout = require("Layout");
-	var layout = new Layout({
-			type: "v",
-			c: [{
+  g.clear(1);
+  Bangle.drawWidgets();
+  var Layout = require("Layout");
+  var layout = new Layout({
+      type: "v",
+      c: [{
           type: "h",
-					c: [{
-							type: "v",
-							c: [{
-									type: "txt",
-									font: "6x8",
-									label: "Throws",
-									//pad: 2
-								}, {
-									type: "txt",
-									id: "throws",
-									font: "6x8:3",
-									label: "  -  ",
-									//pad: 5,
-									bgCol: g.theme.bg
-								}, ]
-						  },{
-							type: "v",
-							c: [{
-									type: "txt",
-									font: "6x8",
-									label: "Total Thr",
-									//pad: 2
-								}, {
-									type: "txt",
-									id: "total_throws",
-									font: "6x8:3",
-									label: "-",
-									//pad: 5,
-									bgCol: g.theme.bg
-								}, ]
-						}, ]
-				}, {
-					type: "h",
-					c: [ {
-							  type: "v",
-							  c: [{
-									type: "txt",
-									font: "6x8",
-									label: "Pre",
-								}, {
-									type: "txt",
-									id: "pre_round",
-									font: "6x8:3",
-									label: " - ",
-								}]
-						}, {
-							  type: "v",
-							  c: [{
-									type: "txt",
-									font: "6x8",
-									label: "Round",
-								}, {
-									type: "txt",
-									id: "round",
-									font: "6x8:3",
-									label: "-",
-								}, ]
-						}, {
-							  type: "v",
-							  c: [{
-									type: "txt",
-									font: "6x8",
-									label: "Speed g/s",
-									//pad: 3
-								}, {
-									type: "txt",
-									id: "Thr_speed",
-									font: "6x8:3",
-									label: "  -  ",
-									//pad: 5,
-									bgCol: g.theme.bg
-								}, ]
-						}]
-				}, {
+          c: [{
+              type: "v",
+              c: [{
+                  type: "txt",
+                  font: "6x8",
+                  label: "Throws",
+                  //pad: 2
+                }, {
+                  type: "txt",
+                  id: "throws",
+                  font: "6x8:3",
+                  label: "  -  ",
+                  //pad: 5,
+                  bgCol: g.theme.bg
+                }, ]
+              },{
+          fillx: 1
+            },{
+              type: "v",
+              c:  [{
+                  type: "txt",
+                  font: "6x8",
+                  label: "Round Time",
+                }, {
+                  type: "txt",
+                  id: "round_time",
+                  font: "6x8:3",
+                  label: "----",
+                }]
+            }, ]
+        }, {
+          type: "h",
+          c: [{
+                type: "v",
+                c: [{
+                  type: "txt",
+                  font: "6x8",
+                  label: "Round",
+                }, {
+                  type: "txt",
+                  id: "round",
+                  font: "6x8:3",
+                  label: "-",
+                }, ]
+            }, {
+                type: "v",
+                c: [{
+                  type: "txt",
+                  font: "6x8",
+                  label: "Pre",
+                }, {
+                  type: "txt",
+                  id: "pre_round",
+                  font: "6x8:3",
+                  label: " - ",
+                }]
+            }, {
+                type: "v",
+                c:[{
+                  type: "txt",
+                  font: "6x8",
+                  label: "Total Thr",
+                  //pad: 2
+                }, {
+                  type: "txt",
+                  id: "total_throws",
+                  font: "6x8:3",
+                  label: "---",
+                  //pad: 5,
+                  bgCol: g.theme.bg
+                }]
+            }]
+        }, {
           filly: 1
         }, {
-					type: "h",
-					c: [{
-									type: "btn",
+          type: "h",
+          c: [{
+                type: "v",
+                c: [{
+                  type: "txt",
+                  font: "6x8",
+                  label: "pre Speed",
+                }, {
+                  type: "txt",
+                  id: "pre_speed",
+                  font: "6x8:3",
+                  label: "---",
+                }, ]
+            },{
+                type: "v",
+                c: [{
+                  type: "txt",
+                  font: "6x8",
+                  label: "Speed g/s",
+                  //pad: 3
+                }, {
+                  type: "txt",
+                  id: "Thr_speed",
+                  font: "6x8:3",
+                  label: "  -  ",
+                  //pad: 5,
+                  bgCol: g.theme.bg
+                }, ]
+            }]
+        }, {
+          type: "h",
+          c: [{
+                  type: "btn",
                   cb: l=>add_round(),
                   src: require("icons").getIcon("sync")
-								}, {
+                }, {
                   type: "btn",
                   id: "time",
                   font: "6x8:3",
@@ -238,10 +272,10 @@ function startRecord() {
                   cb: l=>pause_recording(),
                   btnFaceCol: "#0000FF",
                 }, {
-									type: "btn",
-									id: "btnStop",
+                  type: "btn",
+                  id: "btnStop",
                   src: require("icons").getIcon("close"),
-									btnFaceCol: "#f00",
+                  btnFaceCol: "#f00",
                   cb: () => {
                     if (stopped) {
                       showMenu();
@@ -259,35 +293,47 @@ function startRecord() {
                       layout.render();
                     }
                   }
-						}]
-				}, 
+            }]
+        }, 
          ]
-		}, {lazy:true});
-	layout.render();
+    }, {lazy:true});
+  layout.render();
   //layout.debug();
-	var start_time = getTime();
+  var start_time = getTime();
   var Throws_n = 0;
-	var maxMag = 0;
-	var aX = 0;
+  var maxMag = 0;
+  var aX = 0;
   var show_time = 0;
   var t_old = 0;
   var throw_time_limit = 0;
-  //var write_record = 0;
   var write_time = getTime();
   let end_samples = 40;
   let end_sample_n = 0;
   let save_record = settings.save_record;
+  let send_bt = settings.send_bl;
   let g_lim = settings.throw_g_lim;
-  let throw_max_g = 0;
-  var show_max_thorw_g = 0;
-  let thorw_max_g_n = 0;
+  //let throw_max_g = 0;
+  var show_thr_speed = 0;
+  var show_thr_speed_back = 0;
+  var thr_speed_back = 0;
+  var thr_speed = 0;
+  //let thorw_max_g_n = 0;
   let pause = false;
+  let round_time = getTime();
+  let pre_acc = 0;
+  let acc_d = 0;
+  let acc_d_reset_n = 0;
+  let acc_d_time = 0;
+  let acc_d_n = 0;
+  //let pre_acc_d = 0;
+  let pre_acc_d_time = getTime();
   
   function add_round(){
     round_n++;
     total_throws = total_throws + Throws_n;
     layout.pre_round.label = (settings.max_throws -  Throws_n);
     Throws_n = 0;
+    round_time = getTime();
     if (save_record) SaveFile();
     render_layout();
   }
@@ -304,10 +350,10 @@ function startRecord() {
     }
     layout.render();
   }
-	function accelHandler(accel) {
+  function accelHandler(accel) {
     let timer_ref = getTime();
     aX = Math.abs(accel.x * 2);
-    //print(getTime() - start_time);
+    //(getTime() - start_time);
     if ((timer_ref - t_old) > 60){ // render every 60 sec
       //print((t - t_old));
       t_old = timer_ref;
@@ -315,29 +361,59 @@ function startRecord() {
       render_layout();
     }
     if (pause) return;
-    //console.log(aX);
-    if (throw_max_g != 0){ // after the limit has past count how long stay in the max
-      throw_max_g += aX;
-      thorw_max_g_n++;
-      if (aX < g_lim){
-        show_max_thorw_g = ((throw_max_g / thorw_max_g_n) * (timer_ref -throw_time_limit)).toFixed(2);
-        throw_max_g = 0;
-        thorw_max_g_n = 0;
-        if (end_sample_n < 2) render_layout();
+    //if (throw_max_g != 0){
+    //  throw_max_g += aX;
+    //  thorw_max_g_n++;
+    //  if (aX < g_lim){
+        //show_max_thorw_g = ((throw_max_g / thorw_max_g_n) * (timer_ref -throw_time_limit)).toFixed(2);
+    //    throw_max_g = 0;
+    //    thorw_max_g_n = 0;
+    //    if (end_sample_n < 2) render_layout();
+    //  }
+    // }
+    if (pre_acc < aX && aX > 1){ // calculate acceleration of acc_x
+      acc_d += aX - pre_acc
+      pre_acc = aX;
+      acc_d_n += 1;
+    }
+    else {
+      acc_d_reset_n ++;
+      if (acc_d_reset_n > 2){
+        //print("tulostaa", acc_d_reset_n, acc_d_n, pre_acc);
+        if ( acc_d_n > 4){
+          thr_speed = ~~((acc_d - 1) /(timer_ref - acc_d_time) );
+          //print(show_max_thorw_g, acc_d_n , (timer_ref - pre_acc_d_time));
+          if(thr_speed > settings.throw_speed_lim && (timer_ref - pre_acc_d_time) < 2){
+            //print("heitto");
+            Throws_n++;
+            end_sample_n = 1;
+            show_thr_speed = thr_speed;
+            show_thr_speed_back = thr_speed_back;
+            render_layout();
+          }
+          thr_speed_back = thr_speed;
+          pre_acc_d_time = timer_ref;
+        }
+        acc_d_reset_n = 0;
+        pre_acc = 0;
+        acc_d_time = timer_ref;
+        acc_d = 0;
+        acc_d_n = 0;
       }
     }
     //print(aX, g_lim ,(timer_ref -throw_time_limit));
-		if (aX > g_lim && (timer_ref -throw_time_limit) > 3 ) {
+    //if (aX > g_lim && (timer_ref -throw_time_limit) > 3 ) {
       //console.log(aX, show_time);
-      throw_time_limit = timer_ref;
-      throw_max_g = aX;
-      end_sample_n = 1;
-      thorw_max_g_n = 1;
-      Throws_n++;
-		}
-    if (save_record){
+      //throw_time_limit = timer_ref;
+      //throw_max_g = aX;
+      //end_sample_n = 1;
+      //thorw_max_g_n = 1;
+      //Throws_n++;
+    //}
+    if (save_record || send_bt){
       if (end_sample_n ==  end_samples) {
-        SaveThrowJson(Throws_n);
+        if(save_record) SaveThrowJson(Throws_n);
+        if(send_bt) Send_bl_Throw();
         //json_n++;
         //print(Throws_n, end_sample_n);
         end_sample_n = 0;
@@ -357,18 +433,21 @@ function startRecord() {
       accelId++;
       if (accelId == SAMPLES) accelId = 0;
     }
-	}
+  }
   function render_layout(){
+    let render_round_time = ~~(getTime() - round_time);
     layout.throws.label = Throws_n + "/" + (settings.max_throws -  Throws_n);
-		layout.time.label = Math.floor(show_time / 3600) + ":" + ("0" + ~~(show_time%3600/60)).slice(-2);
+    layout.time.label = Math.floor(show_time / 3600) + ":" + ("0" + ~~(show_time%3600/60)).slice(-2);
+    layout.round_time.label = Math.floor(render_round_time / 3600) + ":" + ("0" + ~~(render_round_time%3600/60)).slice(-2);
     layout.round.label = round_n;
     layout.total_throws.label = (total_throws + Throws_n); //+ "/" + (2*settings.max_throws -  (total_throws + Throws_n));
-    layout.Thr_speed.label = show_max_thorw_g;
-		layout.render();
+    layout.pre_speed.label = show_thr_speed_back;
+    layout.Thr_speed.label = show_thr_speed;
+    layout.render();
   }
   
   render_layout();
-	Bangle.on("accel", accelHandler);
+  Bangle.on("accel", accelHandler);
 }
 Bangle.loadWidgets();
 Bangle.drawWidgets();
