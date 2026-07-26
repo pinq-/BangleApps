@@ -5,7 +5,7 @@
   "version": "0.02",
   "description": "Measure throws in kyykkä",
   "supports" : ["BANGLEJS2"],
-  "author": "pinq-"
+  "author": "pinq-",
   "allow_emulator": true,
   "readme": "README.md",
   "tags": "sport",
