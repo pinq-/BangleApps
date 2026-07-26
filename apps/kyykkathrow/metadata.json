@@ -15,7 +15,7 @@
     {"name":"kyykka.settings.js","url":"kyykka.settings.js"}
   ],
   "data": [
-    {"wildcards":"KyAc_?.csv"},
+    {"wildcard":"KyAc_?.csv"},
     {"name":"kyykka.settings.json"}
   ]
 }
