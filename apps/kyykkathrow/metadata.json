@@ -11,7 +11,7 @@
   "tags": "sport",
   "storage": [
     {"name":"kyykka.app.js","url":"kyykka.app.js"},
-    {"name":"kyykka.png","url":"app-icon.js","evaluate":true},
+    {"name":"kyykka.img","url":"app-icon.js","evaluate":true},
     {"name":"kyykka.settings.js","url":"kyykka.settings.js"}
   ],
   "data": [
