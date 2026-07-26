@@ -8,8 +8,7 @@ var accelz = new Int16Array(SAMPLES);
 var timestep = new Uint16Array(SAMPLES);
 var accelId = 0;
 var total_throws = 0;
-var total_time = 0;
-var throws_acc = [];
+//var throws_acc = [];
 // Todo 
 //  Kiihtyvyys viimeisen nelj ä n heiton perusteella
 // Bpm 
@@ -45,7 +44,6 @@ function SaveFile(){
   let date = new Date();
   let fn = ("0" + ~~(date.getDate())).slice(-2) + ("0" + ~~(date.getMonth() +1)).slice(-2) + date.getFullYear().toString().substr(-2) + "_" + date.getHours() + ("0" + ~~(date.getMinutes())).slice(-2);
   fn = "KyAc_" + fn + ".csv";
-  let json_data = "";
   //print(throws_acc);
   let save_file = require("Storage").open(fn,"w");
   json_files.forEach(f_json => {
@@ -301,11 +299,9 @@ function startRecord() {
   //layout.debug();
   var start_time = getTime();
   var Throws_n = 0;
-  var maxMag = 0;
   var aX = 0;
   var show_time = 0;
   var t_old = 0;
-  var throw_time_limit = 0;
   var write_time = getTime();
   let end_samples = 40;
   let end_sample_n = 0;
@@ -371,7 +367,7 @@ function startRecord() {
     //    if (end_sample_n < 2) render_layout();
     //  }
     // }
-    if (pre_acc < aX && aX > 1){ // calculate acceleration of acc_x
+    if (pre_acc < aX && aX > g_lim){ // calculate acceleration of acc_x
       acc_d += aX - pre_acc
       pre_acc = aX;
       acc_d_n += 1;
