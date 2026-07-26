@@ -1,9 +1,9 @@
 (
   function (back) {
-    var settings = require("Storage").readJSON("Kyykka.settings.json", 1) || {};
+    var settings = require("Storage").readJSON("kyykka.settings.json", 1) || {};
 
     function saveSettings() {
-      require("Storage").writeJSON("Kyykka.settings.json",settings);
+      require("Storage").writeJSON("kyykka.settings.json",settings);
     }
     function showMenu() {
       var menu = [];

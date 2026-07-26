@@ -13,13 +13,13 @@ var throws_acc = [];
 // Todo 
 //  Kiihtyvyys viimeisen nelj ä n heiton perusteella
 // Bpm 
-var settings = require('Storage').readJSON("Kyykka.settings.json", true) || {};
+var settings = require('Storage').readJSON("kyykka.settings.json", true) || {};
 
 function saveSettings() {
-    require("Storage").writeJSON("Kyykka.settings.json",settings);
+    require("Storage").writeJSON("kyykka.settings.json",settings);
   }
 function loadSettings() {
-    settings = require("Storage").readJSON("Kyykka.settings.json",1)||{};
+    settings = require("Storage").readJSON("kyykka.settings.json",1)||{};
   }
 
 function SaveThrowJson(json_n){
@@ -97,7 +97,7 @@ function showMenu() {
       viewLogs();
     },
     "Settings": function () {
-      eval(require("Storage").read("Kyykka.settings.js"))(() => showMenu());
+      eval(require("Storage").read("kyykka.settings.js"))(() => showMenu());
     },
   };
   E.showMenu(menu);
