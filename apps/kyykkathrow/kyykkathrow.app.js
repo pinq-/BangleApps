@@ -13,18 +13,18 @@ var throws_acc = [];
 // Todo 
 //  Kiihtyvyys viimeisen nelj ä n heiton perusteella
 // Bpm 
-var settings = require('Storage').readJSON("kyykka.settings.json", true) || {};
+var settings = require('Storage').readJSON("kyykkathrow.settings.json", true) || {};
 
 function saveSettings() {
-    require("Storage").writeJSON("kyykka.settings.json",settings);
+    require("Storage").writeJSON("kyykkathrow.settings.json",settings);
   }
 function loadSettings() {
-    settings = require("Storage").readJSON("kyykka.settings.json",1)||{};
+    settings = require("Storage").readJSON("kyykkathrow.settings.json",1)||{};
   }
 
 function SaveThrowJson(json_n){
   //print(timestep);
-  require("Storage").write("KyRec_" + (json_n + 1) + ".json", btoa(accelx.buffer) + "-*-" +  btoa(accely.buffer) + "-*-" + btoa(accelz.buffer) + "-*-" + btoa(timestep.buffer));
+  require("Storage").write("kyykkathrow_KyRec_" + (json_n + 1) + ".json", btoa(accelx.buffer) + "-*-" +  btoa(accely.buffer) + "-*-" + btoa(accelz.buffer) + "-*-" + btoa(timestep.buffer));
   //print(btoa(timestep.buffer));
 }
 
@@ -40,7 +40,7 @@ function SaveFile(){
   E.showMessage("Saving data");
   let storage = require("Storage");
   //let csv_files_N = storage.list(/^KyAc_.*$/).length;
-  let json_files = storage.list(/^KyRec_.*.json$/);
+  let json_files = storage.list(/^kyykkathrow_KyRec_.*.json$/);
   let csv = "";
   let date = new Date();
   let fn = ("0" + ~~(date.getDate())).slice(-2) + ("0" + ~~(date.getMonth() +1)).slice(-2) + date.getFullYear().toString().substr(-2) + "_" + date.getHours() + ("0" + ~~(date.getMinutes())).slice(-2);
@@ -97,7 +97,7 @@ function showMenu() {
       viewLogs();
     },
     "Settings": function () {
-      eval(require("Storage").read("kyykka.settings.js"))(() => showMenu());
+      eval(require("Storage").read("kyykkathrow.settings.js"))(() => showMenu());
     },
   };
   E.showMenu(menu);

@@ -10,12 +10,12 @@
   "readme": "README.md",
   "tags": "sport",
   "storage": [
-    {"name":"kyykka.app.js","url":"kyykka.app.js"},
-    {"name":"kyykka.img","url":"app-icon.js","evaluate":true},
-    {"name":"kyykka.settings.js","url":"kyykka.settings.js"}
+    {"name":"kyykkathrow.app.js","url":"kyykkathrow.app.js"},
+    {"name":"kyykkathrow.img","url":"app-icon.js","evaluate":true},
+    {"name":"kyykkathrow.settings.js","url":"kyykkathrow.settings.js"}
   ],
   "data": [
-    {"wildcard":"KyAc_?.csv"},
-    {"name":"kyykka.settings.json"}
+    {"wildcard":"kyykkathrow_KyAc_?.csv"},
+    {"name":"kyykkathrow.settings.json"}
   ]
 }
