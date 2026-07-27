@@ -12,13 +12,13 @@ var total_throws = 0;
 // Todo 
 //  Kiihtyvyys viimeisen nelj ä n heiton perusteella
 // Bpm 
-var settings = require('Storage').readJSON("kyykkathrow.settings.json", true) || {};
+var settings = require('Storage').readJSON("kyykkathrow.settings.json", true) || {"max_throws":0,"throw_speed_lim":20,"throws_n":0,"total_time":0};
 
 function saveSettings() {
     require("Storage").writeJSON("kyykkathrow.settings.json",settings);
   }
 function loadSettings() {
-    settings = require("Storage").readJSON("kyykkathrow.settings.json",1)||{};
+    settings = require("Storage").readJSON("kyykkathrow.settings.json",1)||{"max_throws":0,"throw_speed_lim":20,"throws_n":0,"total_time":0};
   }
 
 function SaveThrowJson(json_n){
