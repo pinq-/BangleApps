@@ -1,6 +1,6 @@
 (
   function (back) {
-    var settings = require("Storage").readJSON("kyykkathrow.settings.json", 1) || {};
+    var settings = require("Storage").readJSON("kyykkathrow.settings.json", 1) || {"max_throws":0,"throw_g_lim":5,"throws_n":0,"total_time":0};
 
     function saveSettings() {
       require("Storage").writeJSON("kyykkathrow.settings.json",settings);
@@ -20,10 +20,10 @@
         }
       });
       menu.push({
-        title: "Throw speed lim",
-        value : settings.throw_speed_lim, min: 25, max:40, step:5,
+        title: "Throw g-force threshold",
+        value : settings.throw_g_lim, min:1 , max:7, step:0.5,
         onchange : (v)  => {
-                settings.throw_speed_lim = v;
+                settings.throw_g_lim = v;
                 saveSettings();
         }
       });
