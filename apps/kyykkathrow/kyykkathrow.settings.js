@@ -1,6 +1,6 @@
 (
   function (back) {
-    var settings = require("Storage").readJSON("kyykkathrow.settings.json", 1) || {"max_throws":0,"throw_g_lim":5,"throws_n":0,"total_time":0};
+    var settings = require("Storage").readJSON("kyykkathrow.settings.json", 1) || {"max_throws":0,"throw_g_lim":5, "throw_speed_lim":20,"throws_n":0,"total_time":0,"throw_log":[], "send_bl":false, "save_record":false};
 
     function saveSettings() {
       require("Storage").writeJSON("kyykkathrow.settings.json",settings);
@@ -27,6 +27,15 @@
                 saveSettings();
         }
       });
+      menu.push({
+        title: "Throw g-force speed limit",
+        value : settings.throw_speed_lim, min:10 , max:40, step:5,
+        onchange : (v)  => {
+                settings.throw_speed_lim = v;
+                saveSettings();
+        }
+      });
+      "throw_speed_lim"
       menu.push({
         title: "Reset records",
         onchange : ()  => {

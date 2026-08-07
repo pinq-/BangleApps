@@ -1,4 +1,5 @@
 
+
 var HZ = 100;
 var SAMPLES = 1.6 * HZ;
 var SCALE = 2000;
@@ -10,15 +11,15 @@ var accelId = 0;
 var total_throws = 0;
 var total_time = 0;
 // Todo 
-//  Kiihtyvyys viimeisen nelj ä n heiton perusteella
+//  Kiihtyvyys viimeisen nelj ï¿½ n heiton perusteella
 // Bpm 
-var settings = require('Storage').readJSON("kyykkathrow.settings.json", true) || {"max_throws":0,"throw_g_lim":5,"throws_n":0,"total_time":0 , "throw_log":[]};
+var settings = require('Storage').readJSON("kyykkathrow.settings.json", true) || {"max_throws":0,"throw_g_lim":5,"throw_speed_lim":20, "throws_n":0,"total_time":0 , "throw_log":[], "throw_speed_lim":20};
 
 function saveSettings() {
     require("Storage").writeJSON("kyykkathrow.settings.json",settings);
   }
 function loadSettings() {
-    settings = require("Storage").readJSON("kyykkathrow.settings.json",1)||{"max_throws":0,"throw_g_lim":5,"throws_n":0,"total_time":0 , "throw_log":[]};
+    settings = require("Storage").readJSON("kyykkathrow.settings.json",1)||{"max_throws":0,"throw_g_lim":5,"throw_speed_lim":20, "throws_n":0,"total_time":0 , "throw_log":[], "throw_speed_lim":20};
   }
 
 function SaveThrowJson(json_n){
@@ -59,17 +60,8 @@ function SaveFile(){
     }
     csv += `${0},${0},${0},${0}\n`;
     save_file.write(csv);
-    //offset++;
-    //if (offset_old == 0)
-    //  storage.write(fn, csv);
-    //else
-    //  storage.write(fn, csv, offset_old);
-    //print(offset_old);
-    //offset_old = offset;
+
   });
-  //if (csv != "") storage.write(fn, csv);
-  //    storage.write(file.name,txt,file.offset);
-  //  file.offset += l;
   RemoveOldJson(json_files);
   g.clear();
   E.showMessage("Saved");
@@ -82,7 +74,7 @@ function Send_bl_Throw(){
 function showMenu() {
   var menu = {
     "": {
-      title: "Kyykka äpp"
+      title: "Kyykka ï¿½pp"
     },
     "< Back": function () {
       load();
@@ -158,6 +150,7 @@ function startRecord() {
       type: "v",
       c: [{
           type: "h",
+          bgCol: "#FFFF00",
           c: [{
               type: "v",
               c: [{
@@ -170,8 +163,6 @@ function startRecord() {
                   id: "throws",
                   font: "6x8:3",
                   label: "  -  ",
-                  //pad: 5,
-                  bgCol: g.theme.bg
                 }, ]
               },{
           fillx: 1
@@ -226,8 +217,6 @@ function startRecord() {
                   id: "total_throws",
                   font: "6x8:3",
                   label: "---",
-                  //pad: 5,
-                  bgCol: g.theme.bg
                 }]
             }]
         }, {
@@ -238,29 +227,41 @@ function startRecord() {
                 type: "v",
                 c: [{
                   type: "txt",
-                  font: "6x8",
-                  label: "pre Speed",
+                  font: "10%",
+                  label: "<- g/s",
                 }, {
                   type: "txt",
                   id: "pre_speed",
-                  font: "6x8:3",
-                  label: "---",
-                }, ]
+                  font: "16%",
+                  label: " - ",
+                },],
+                bgCol: "#00FFFF"
             },{
                 type: "v",
                 c: [{
                   type: "txt",
-                  font: "6x8",
-                  label: "Speed g/s",
-                  //pad: 3
+                  font: "10%",
+                  label: "-> g/s",
                 }, {
                   type: "txt",
                   id: "Thr_speed",
-                  font: "6x8:3",
-                  label: "  -  ",
-                  //pad: 5,
-                  bgCol: g.theme.bg
-                }, ]
+                  font: "16%",
+                  label: " - ",
+                },],
+                bgCol: "#80FF00"
+            },{
+                type: "v",
+                c: [{
+                  type: "txt",
+                  font: "10%",
+                  label: "Max g",
+                }, {
+                  type: "txt",
+                  id: "max_g",
+                  font: "16%",
+                  label: " - ",
+                }, ],
+                bgCol: "#FF8000"
             }]
         }, {
           type: "h",
@@ -275,7 +276,7 @@ function startRecord() {
                   label: "-",
                   fillx: 1,
                   cb: l=>pause_recording(),
-                  btnFaceCol: "#0000FF",
+                  btnFaceCol: "#55ffee",
                 }, {
                   type: "btn",
                   id: "btnStop",
@@ -306,30 +307,22 @@ function startRecord() {
   //layout.debug();
   var start_time = getTime();
   var Throws_n = 0;
-  var aX = 0, aX_avg = 0;
+  var aX = 0;
   var show_time = 0;
   var t_old = 0; // for rendering every second
-  var throw_time_limit = 0;
   var write_time = getTime();
-  let end_samples = 20;
+  let end_samples = 20; // how many samples after record
   let end_sample_n = 0;
   let save_record = settings.save_record;
   let send_bt = settings.send_bl;
   let g_lim = settings.throw_g_lim;
-  //let throw_max_g = 0;
-  var show_thr_speed = 0;
-  var show_thr_speed_back = 0;
-  var thr_speed_back = 0;
-  var thr_speed = 0;
-  //let thorw_max_g_n = 0;
+  let show_throw_max_g = 0;
+  let show_thr_speed = 0;
+  let show_thr_speed_back = 0;
   let pause = false;
   let round_time = getTime();
-  let acc_d = 0, acc_d_n = 0;
-  let acc_d_reset_n = 0;
-  let acc_d_time = 0;
-  //let pre_acc_d = 0;
+  let acc_d_n = 0;
   let pre_acc_d_time = getTime();
-  let pre_acc_1 = 1, pre_acc_2 = 1;
   let timer_ref = 0;
   
   
@@ -347,28 +340,21 @@ function startRecord() {
     pause = !pause;
     if (pause){
       layout.time.btnFaceCol = "#f00";
-      //Bangle.removeListener("accel", accelHandler);
     }
     else{
-      layout.time.btnFaceCol = "#0000FF";
-      //Bangle.on("accel", accelHandler);
+      layout.time.btnFaceCol = "#55ffee";
     }
     layout.render();
   }
   
   function is_it_throw(){
-    //let test_x  = rerange_array(accelx, accelId);
-    //let test_time  = rerange_array(timestep, accelId);
     let time_ref = 0, last_time = 0, edge_start_time = 0;
     let pre_ax = 1, pre_ax_n = 0,ax_off_n = 0, speed = 0, pre_speed = 0;
     let pull_speed = 0,thorw_speed = 0, is_it_throw = false;
-    for( let i = accelId + 1; i !== accelId; i++){
-      if( i == accelx.length) i = 0;
-    //test_x.forEach((x, i) => {
+    for (let n = 1; n < accelx.length; n++) {
+      let i = (accelId + n) % accelx.length;
       time_ref = timestep[i]/1000;
-      //time_ref = test_time[i]/1000;
-      x = Math.abs(accelx[i] /SCALE);
-      //x = Math.abs(x /SCALE);
+      let x = Math.abs(accelx[i] /SCALE);
       if (pre_ax < x){
         pre_ax = x;
         pre_ax_n ++;
@@ -376,8 +362,8 @@ function startRecord() {
       }
       else {
         ax_off_n ++;
-        if (ax_off_n > 20){
-          if (pre_ax_n > 10){
+        if (ax_off_n > 8){ // cool down
+          if (pre_ax_n > 6){ // how many samples for rising
             speed = (pre_ax - 1)/ (last_time - edge_start_time);
             //print("kerattya",speed, pre_speed, pre_ax, (last_time- (timestep[accelId]/1000))*1000, (edge_start_time- (timestep[accelId]/1000))*1000,(last_time - edge_start_time), pre_ax_n)
 
@@ -387,7 +373,8 @@ function startRecord() {
               is_it_throw = true;
               show_thr_speed = speed;
               show_thr_speed_back = pre_speed;
-              //print(show_thr_speed, show_thr_speed_back)
+              show_throw_max_g = pre_ax;
+              //print("heitto tapahtunut:", show_throw_max_g);
             }
             pre_speed = speed;
           }
@@ -397,25 +384,21 @@ function startRecord() {
           ax_off_n = 0;
         }
       }
-    };
+    }
     //print("throw speed",show_thr_speed);
     //print(test_x);
     //print(test_time);
     if(is_it_throw){
-     return true
+     return true;
     }
     else{
-      return false
+      return false;
     }
   }
   function accelHandler(accel) {
     //print(getTime() - timer_ref);
     timer_ref = getTime();
     aX = Math.abs(accel.x * 2);
-    //aX_avg = (aX + pre_acc_1 + pre_acc_2) / 3;
-    //pre_acc_2 = pre_acc_1;
-    //pre_acc_1 = aX;
-    //(getTime() - start_time);
     if ((timer_ref - t_old) > 60){ // render every 1 min
       //print((t - t_old));
       t_old = timer_ref;
@@ -423,95 +406,40 @@ function startRecord() {
       render_layout();
     }
     if (pause) return;
-    //if (throw_max_g != 0){
-    //  throw_max_g += aX;
-    //  thorw_max_g_n++;
-    //  if (aX < g_lim){
-        //show_max_thorw_g = ((throw_max_g / thorw_max_g_n) * (timer_ref -throw_time_limit)).toFixed(2);
-    //    throw_max_g = 0;
-    //    thorw_max_g_n = 0;
-    //    if (end_sample_n < 2) render_layout();
-    //  }
-    // }
-    //print(aX_avg, aX);
-    //if (acc_d < aX){ // calculate acceleration of acc_x
-      //print(aX);
-    //  acc_d = aX
-      //pre_acc_2 = pre_acc_1;
-      //pre_acc_1 = aX;
-    //  acc_d_n += 1;
-    //}
-    //else {
-    //  acc_d_reset_n ++;
-    //  if (acc_d_reset_n > 3){
-    //    //print("tulostaa", acc_d_reset_n, acc_d_n, pre_acc);
-    //    if ( acc_d_n > 4){
-    //      thr_speed = ((acc_d - 1) /(timer_ref - acc_d_time)) << 0;
-    //      //print(thr_speed, acc_d_n , (timer_ref - acc_d_time), acc_d);
-    //      if(thr_speed > settings.throw_speed_lim -10 && (timer_ref - acc_d_time) < 2 && thr_speed_back < thr_speed ){
-    //        //print("heitto");
-    //        Throws_n++;
-    //        end_sample_n = 1;
-    //        show_thr_speed = thr_speed;
-    //        show_thr_speed_back = thr_speed_back;
-    //        render_layout();
-    //      }
-    //      thr_speed_back = thr_speed;
-    //      pre_acc_d_time = timer_ref;
-    //    }
-    //    acc_d_reset_n = 0;
-    //    //pre_acc_1 = 1;
-    //    //pre_acc_2 = 1;
-    //    acc_d_time = timer_ref;
-    //    acc_d = 1;
-    //    acc_d_n = 0;
-    //  }
-    //}
-    //print(aX, g_lim ,(timer_ref -throw_time_limit));
-    //if (aX > g_lim && (timer_ref -throw_time_limit) > 3 ) {
-      //console.log(aX, show_time);
-      //throw_time_limit = timer_ref;
-      //throw_max_g = aX;
-      //end_sample_n = 1;
-      //thorw_max_g_n = 1;
-      //Throws_n++;
-    //}
     if (g_lim < aX){// Was it a throw
       acc_d_n ++;
-      print(" over 5g", acc_d_n);
-      if (acc_d_n > 4){
+      //print(" over 5g", acc_d_n);
+      if (acc_d_n > 4){ // if increase happens home than 4 samples
         end_sample_n = 1;
         acc_d_n = 0;
       }
     }
-
-    //if (save_record || send_bt){
-      if (end_sample_n ==  end_samples) {
-        //print("is it a throw");
+    if (end_sample_n ==  end_samples) {
+      //print("is it a throw");
+      //if(send_bt) Send_bl_Throw();
+      if(is_it_throw()){
+        if(save_record) SaveThrowJson(Throws_n);
         if(send_bt) Send_bl_Throw();
-        if(is_it_throw()){
-          if(save_record) SaveThrowJson(Throws_n);
-          //if(send_bt) Send_bl_Throw();
-          Throws_n++;
-          //json_n++;
-          //print(Throws_n, end_sample_n);
-          end_sample_n = 0;
-          write_time = timer_ref;
-          accelx.fill(0);
-          //accely.fill(0);
-          //accelz.fill(0);
-          timestep.fill(0);
-          render_layout();
-        }
+        Throws_n++;
+        //json_n++;
+        //print(Throws_n, end_sample_n);
+        end_sample_n = 0;
+        write_time = timer_ref;
+        accelx.fill(0);
+        //accely.fill(0);
+        //accelz.fill(0);
+        timestep.fill(0);
+        render_layout();
       }
-      accelx[accelId] = accel.x * SCALE * 2;
-      //accely[accelId] = accel.y * SCALE * 2;
-      //accelz[accelId] = accel.z * SCALE * 2;
-      if ((timer_ref - write_time) > 65) write_time = timer_ref; // If it goes over 65535. Limit of the Uint16
-      timestep[accelId] = (timer_ref - write_time)*1000;
-      if (end_sample_n > 0) end_sample_n++;
-      accelId++;
-      if (accelId == SAMPLES) accelId = 0;
+    }
+    accelx[accelId] = accel.x * SCALE * 2;
+    //accely[accelId] = accel.y * SCALE * 2;
+    //accelz[accelId] = accel.z * SCALE * 2;
+    if ((timer_ref - write_time) > 65) write_time = timer_ref; // If it goes over 65535. Limit of the Uint16
+    timestep[accelId] = (timer_ref - write_time)*1000;
+    if (end_sample_n > 0) end_sample_n++;
+    accelId++;
+    if (accelId == SAMPLES) accelId = 0;
     //}
   }
   function render_layout(){
@@ -523,6 +451,7 @@ function startRecord() {
     layout.total_throws.label = (total_throws + Throws_n); //+ "/" + (2*settings.max_throws -  (total_throws + Throws_n));
     layout.pre_speed.label = ~~(show_thr_speed_back);
     layout.Thr_speed.label = ~~(show_thr_speed);
+    layout.max_g.label = Math.round(10 * show_throw_max_g) / 10;
     layout.render();
   }
   
